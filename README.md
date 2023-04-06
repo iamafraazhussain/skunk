@@ -62,6 +62,18 @@ The reduce function takes a term and a list of (document ID, term frequency) tup
 <br></br>
 
 #### Term-Partitioned indexing
+The termPartitionedIndex class uses term partitioning to generate the term index. It first applies the map function to each document's content, generating a list of (term, document ID, term frequency) tuples. Then it partitions these tuples into multiple partitions and applies the reduce function to each partition to generate a list of (term, total term frequency, list of (document ID, term frequency) tuples) tuples.
+###### init(self, payload, numberOfPartitions = 1) function
+The constructor function initializes two lists, `documentLocation` and `documentContent`, which store the location and content of the input text files. It also calls the `termPartitionedIndexing()` function to create the term index.
+###### termPartitionedIndexing(self, numberOfPartitions) function
+This function takes the number of partitions to use and generates a term index using term partitioning. The function first calls the `mapFunction()` function to generate a list of (term, document ID, term frequency) tuples. Then, it calls the `partitionData()` function to split the tuples into the specified number of partitions. Finally, the function applies the `reduceFunction()` function to each partition to generate a list of (term, total term frequency, list of (document ID, term frequency) tuples) tuples.
+###### partitionData(self, data, numberOfPartitions) function
+This function takes the list of (term, document ID, term frequency) tuples and the number of partitions to use and returns a list of lists of tuples, with each inner list representing a partition.
+###### mapFunction(self, documentID, document) function
+The map function takes a document ID and its content and generates a list of (term, (document ID, term frequency)) tuples. It returns the list of tuples.
+###### reduceFunction(self, term, documentCounts) function
+The reduce function takes a term and a list of (document ID, term frequency) tuples and returns a tuple of (term, total term frequency, list of (document ID, term frequency) tuples). This function is called by the `termPartitionedIndexing()` function.
+
 
 <br></br>
 
@@ -90,6 +102,9 @@ Run the following commands in your Python terminal to install the mentioned modu
 - ```pip install re```
 - ```pip install tkinter```
 - ```pip install webbrowser```
+
+Run the below commeand to install all the required modules in a single go
+```pip install PyQt6, re, tkinter, webbrowser```
 
 Rest of the modules should come pre-installed. Make sure to store all the files you downloaded in the same folder as available on GitHub. Proceed by running `skunk.py`.
 
