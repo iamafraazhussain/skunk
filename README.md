@@ -42,27 +42,26 @@ By dividing the indexing workload into smaller subsets and distributing them acr
 
 <br></br>
 
-## How does the query processor in skunk work?
+## How does the document processor in skunk work?
 Distributed indexing is a technique that allows indexing and searching of data across multiple machines or nodes. This technique is widely used in large-scale search engines, as it allows the system to handle a large amount of data and traffic.
 There are several approaches to implement distributed indexing, and two commonly used techniques are dynamic indexing and term-partitioned indexing. In this code, we can see the implementation of these techniques in two separate classes: `dynamicIndex` and `termPartitionedIndex`.
 
 <br></br>
 
 #### Dynamic indexing
-Dynamic indexing is a technique where the index is updated dynamically as new documents are added to the system. In other words, the index is built on the fly, and it is not necessary to rebuild the entire index each time a new document is added. In this code, the `dynamicIndex` class implements dynamic indexing.
-The `dynamicIndex` class has two main functions, `addDocument()` and `search()`. The `addDocument()` function adds a new document to the system and updates the inverted index accordingly. The inverted index is a data structure that stores the mapping between terms and the documents that contain them. In this implementation, the inverted index is implemented as a dictionary where each term is mapped to a set of document IDs. When a new document is added, the `addDocument()` function splits the document text into individual terms and adds the document ID to the corresponding set in the inverted index.
-###### search() function
-The `search()` function takes a query as input and returns a list of relevant documents sorted by their relevance score. The relevance score is calculated by counting the number of query terms that appear in each document. To find the relevant documents, the `search()` function looks up each query term in the inverted index and retrieves the set of documents that contain the term. The function then takes the union of these sets to get a set of relevant documents. Finally, the function calculates the relevance score for each relevant document and returns a list of documents sorted by their relevance scores.
+The `dynamicIndex` class uses MapReduce to generate the term index. It first applies the map function to each document's content, generating a list of (term, document ID, term frequency) tuples. Then it applies the reduce function to group the tuples by term and generate a list of (term, set of document IDs) tuples.
+###### init(self, payload) function
+The constructor function initializes two lists, `documentLocation` and `documentContent`, which store the location and content of the input text files. It also calls the `mapReduce()` function to create the term index.
+###### mapReduce(self) function
+This function takes each document's content, applies the map function, and then applies the reduce function to generate the term index. The intermediate results are stored in a defaultdict called intermediate, where each term is mapped to a list of document IDs and their term frequency. Finally, the function returns the reduced list of (term, document IDs) pairs.
+###### mapFunction(self, content) function
+The map function takes the content of each document and generates a list of (term, document ID, term frequency) tuples. It returns the list of tuples.
+###### reduceFunction(self, term, documentCount) function
+The reduce function takes a term and a list of (document ID, term frequency) tuples and returns a tuple of (term, set of document IDs). This function is called by the `mapReduce()` function.
 
 <br></br>
 
 #### Term-Partitioned indexing
-Term-partitioned indexing is a technique where the index is partitioned into multiple parts based on the terms that occur in the documents. In this technique, the documents are distributed across multiple machines based on the terms they contain. Each machine is responsible for indexing and searching the documents that contain a specific subset of terms. In this code, the `termPartitionedIndex` class implements term-partitioned indexing.
-The `termPartitionedIndex` class has three main functions, `__init__()`, `addDocument()`, and `search()`. The `__init__()` function initializes the class and creates the inverted index. The inverted index is implemented as a list of dictionaries, where each dictionary represents the inverted index for a subset of terms. The number of dictionaries in the list is equal to the number of machines used in the system.
-###### addDocuments() function
-The `addDocument()` function adds a new document to the system and updates the inverted index accordingly. To determine which subset of terms the document belongs to, the function hashes each term and uses the hash value to determine the corresponding subset of terms. The document is then added to the inverted index for that subset of terms.
-###### search() function
-The `search()` function takes a query as input and returns a list of relevant documents sorted by their relevance score. The function first determines which subset of terms the query belongs to by hashing each query term and using the hash value to determine the corresponding subset of terms. The function then retrieves the set of relevant documents from the inverted index for that subset of terms. Finally, the function calculates the relevance score for each relevant document and returns a list of documents sorted by their relevance scores.
 
 <br></br>
 
@@ -71,9 +70,8 @@ skunk is a text searching app that implements two types of indexing, dynamic ind
 #### skunk's key features
 - One of the key features of skunk is its ability to implement two types of indexing. This is important because different types of indexing work better for different types of search scenarios. For instance, dynamic indexing works best for small to medium-sized datasets while term-partitioned indexing is more suited for larger datasets. By having both types of indexing available, skunk can handle a wide range of search queries.
 - Another important feature of skunk is its GUI. The GUI makes it easy for users to navigate through the app and search for documents. Users can select individual documents or entire directories for scanning. Once the search is complete, skunk returns the documents in order of relevance, making it easier for users to find the information they need.
-- In addition to the GUI, skunk has other user-friendly features. For instance, it allows users to search for multiple queries at once. This is particularly useful for users who need to find information across a range of different topics. skunk also provides users with the ability to sort the search results based on various criteria, such as relevance or date.
 
-skunk is a powerful text searching app that implements two types of indexing and provides users with a range of user-friendly features. With its GUI, ability to search through different types of documents, and security features, skunk is a useful tool for anyone who needs to search for information quickly and efficiently.
+skunk is a powerful document indexing app that implements two types of indexing and provides users with a range of user-friendly features. With its GUI, ability to search through different types of documents, and security features, skunk is a useful tool for anyone who needs to index documents quickly and efficiently.
 
 <br></br>
 
